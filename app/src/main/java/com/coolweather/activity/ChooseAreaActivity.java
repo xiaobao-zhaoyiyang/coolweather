@@ -1,0 +1,155 @@
+package com.coolweather.activity;
+
+import android.app.ProgressDialog;
+import android.os.Bundle;
+import android.support.annotation.Nullable;
+import android.support.v7.app.AppCompatActivity;
+import android.util.Log;
+import android.view.View;
+import android.widget.AdapterView;
+import android.widget.ArrayAdapter;
+import android.widget.ListView;
+import android.widget.TextView;
+
+import com.coolweather.R;
+import com.coolweather.db.CoolWeatherDB;
+import com.coolweather.model.City;
+import com.coolweather.model.Province;
+import com.thinkpage.lib.api.TPCity;
+import com.thinkpage.lib.api.TPCityInformation;
+import com.thinkpage.lib.api.TPListeners;
+import com.thinkpage.lib.api.TPWeatherManager;
+
+import java.util.ArrayList;
+import java.util.List;
+
+/**
+ * Created by yo on 2016/6/16.
+ */
+public class ChooseAreaActivity extends AppCompatActivity {
+    public static final int LEVEL_PROVINCE = 0;
+    public static final int LEVEL_CITY = 1;
+    private ProgressDialog progressDialog;
+    private TextView titleText;
+    private ListView listView;
+    private List<Province> list_province;
+    private List<City> list_city;
+    private List<String> dataList = new ArrayList<>();
+    private ArrayAdapter<String> adapter;
+    private CoolWeatherDB db;
+    private Province selectedProvince; // 当前选中的省份
+    private City selectedCity; // 当前选中的城市
+    private int currentLevel; // 当前选中的级别
+    @Override
+    protected void onCreate(@Nullable Bundle savedInstanceState) {
+        super.onCreate(savedInstanceState);
+        setContentView(R.layout.choose_area);
+        getSupportActionBar().hide();
+        titleText = (TextView) findViewById(R.id.title_text);
+        listView = (ListView) findViewById(R.id.list_view);
+        adapter = new ArrayAdapter<String>(this, android.R.layout.simple_list_item_1, dataList);
+        listView.setAdapter(adapter);
+        db = CoolWeatherDB.getInstance(this);
+        queryProvince();
+        listView.setOnItemClickListener(new AdapterView.OnItemClickListener() {
+            @Override
+            public void onItemClick(AdapterView<?> parent, View view, int position, long id) {
+                if (currentLevel == LEVEL_PROVINCE){
+                    selectedProvince = list_province.get(position);
+                    queryCities();
+                }
+            }
+        });
+    }
+
+    /**
+     * 查询全国所有的省
+     */
+    private void queryProvince(){
+        list_province = db.loadProvince();
+        Log.i("list_province", "list_province：" + list_province.size());
+        if (list_province.size() > 0){
+            dataList.clear();
+            for (Province province : list_province) {
+                dataList.add(province.getProvinceName());
+            }
+            Log.i("dataList", "dataList数据：" + dataList.size());
+            adapter.notifyDataSetChanged();
+            listView.setSelection(0);
+            titleText.setText("中国");
+            currentLevel = LEVEL_PROVINCE;
+        }
+    }
+
+    /**
+     * 查询点击省份下的所有城市
+     */
+    private void queryCities() {
+        list_city = db.loadCities(selectedProvince.getProvinceCode());
+        if (list_city.size() > 0){
+            dataList.clear();
+            for (City city : list_city) {
+                dataList.add(city.getCityName());
+            }
+            adapter.notifyDataSetChanged();
+            listView.setSelection(0);
+            titleText.setText(selectedProvince.getProvinceName());
+            currentLevel = LEVEL_CITY;
+        }else {
+            queryFromServer(selectedProvince.getProvinceCode());
+        }
+    }
+
+    private void queryFromServer(final String code) {
+        showProgressDialog();
+        TPWeatherManager weatherManager = TPWeatherManager.sharedWeatherManager();
+        weatherManager.initWithKeyAndUserId("9nlflw6lyxl2ta03","U90698F7A1");
+        weatherManager.getCityInformation(new TPCity(code)
+                , TPWeatherManager.TPWeatherReportLanguage.kSimplifiedChinese
+                , 200
+                , 0
+                , new TPListeners.TPCityInformationListener(){
+
+                    @Override
+                    public void onCityInformationAvailable(TPCityInformation[] tpCityInformations, String s) {
+                        Log.i("TPCityInformation", tpCityInformations.length + "");
+                        for (int i = 0; i < tpCityInformations.length; i++) {
+                            Log.i("TPCityInformation", "tpCityInformations_" + i + ":" + tpCityInformations[i].name
+                                    + ", " + tpCityInformations[i].cityid + ", " + tpCityInformations[i].countryCode);
+                            City city = new City();
+                            city.setProvinceCode(code);
+                            city.setCityName(tpCityInformations[i].name);
+                            city.setCityCode(tpCityInformations[i].cityid);
+                            db.saveCity(city);
+                        }
+                        closeProgressDialog();
+                        queryCities();
+                    }
+                });
+
+    }
+
+    private void closeProgressDialog() {
+        if (progressDialog != null){
+            progressDialog.dismiss();
+        }
+    }
+
+    private void showProgressDialog() {
+        if (progressDialog == null){
+            progressDialog = new ProgressDialog(this);
+            progressDialog.setMessage("正在加载...");
+            progressDialog.setCanceledOnTouchOutside(false);
+        }
+        progressDialog.show();
+    }
+
+    @Override
+    public void onBackPressed() {
+        if (currentLevel == LEVEL_CITY){
+            queryProvince();
+        }else if (currentLevel == LEVEL_PROVINCE){
+            finish();
+        }
+    }
+}
