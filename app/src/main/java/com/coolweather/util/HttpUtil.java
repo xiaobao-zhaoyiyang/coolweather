@@ -1,5 +1,7 @@
 package com.coolweather.util;
 
+import android.util.Log;
+
 import java.io.BufferedReader;
 import java.io.InputStream;
 import java.io.InputStreamReader;
@@ -23,6 +25,7 @@ public class HttpUtil {
                     connection.setConnectTimeout(8000);
                     connection.setDoInput(true);
                     connection.setDoOutput(true);
+                    Log.i("TAg", "code:" + connection.getResponseCode());
                     InputStream is = connection.getInputStream();
                     BufferedReader reader = new BufferedReader(new InputStreamReader(is));
                     StringBuilder response = new StringBuilder();

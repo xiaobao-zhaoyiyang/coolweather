@@ -4,4 +4,10 @@
     android:layout_height="match_parent"
     android:orientation="vertical">
 
+    <TextView
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:text="我是启动页"
+        android:textSize="30sp"
+        android:gravity="center"/>
 </LinearLayout>
