@@ -1,6 +1,7 @@
 package com.coolweather.activity;
 
 import android.app.ProgressDialog;
+import android.content.Intent;
 import android.os.Bundle;
 import android.support.annotation.Nullable;
 import android.support.v7.app.AppCompatActivity;
@@ -67,6 +68,12 @@ public class ChooseAreaActivity extends AppCompatActivity {
                 if (currentLevel == LEVEL_PROVINCE){
                     selectedProvince = list_province.get(position);
                     queryCities();
+                }else if (currentLevel == LEVEL_CITY){
+                    selectedCity = list_city.get(position);
+                    Intent intent = new Intent(ChooseAreaActivity.this,
+                            WeatherActivity.class);
+                    intent.putExtra("city_code", selectedCity.getCityName());
+                    startActivity(intent);
                 }
             }
         });
