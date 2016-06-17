@@ -16,6 +16,7 @@ import android.widget.ImageView;
 import android.widget.TextView;
 
 import com.coolweather.R;
+import com.coolweather.service.AutoUpdateService;
 import com.coolweather.util.HttpCallbackListener;
 import com.coolweather.util.HttpUtil;
 import com.coolweather.util.Utility;
@@ -46,7 +47,6 @@ public class WeatherActivity extends AppCompatActivity implements View.OnClickLi
         tv_title.setText(cityName);
         showWeather();
         showLife();
-        queryFromServer(cityName);
     }
 
     private void initView() {
@@ -150,6 +150,8 @@ public class WeatherActivity extends AppCompatActivity implements View.OnClickLi
         SharedPreferences prefs_1 = getSharedPreferences(cityCode + "_1", Context.MODE_PRIVATE);
         if (!TextUtils.isEmpty(prefs_1.getString("publish_time", ""))){
             tv_publishTime.setText("发布时间:" +(prefs_1.getString("publish_time", "")).substring(10, 19));
+        }else{
+            queryFromServer(cityName);
         }
         tv_temp.setText(prefs_1.getString("temperature", "0") + "℃");
         tv_weather.setText(prefs_1.getString("weatherText", "未知"));
@@ -174,6 +176,9 @@ public class WeatherActivity extends AppCompatActivity implements View.OnClickLi
         tv_sport.setText(prefs_2.getString("life_sport", "风雨无阻"));
         tv_uv.setText(prefs_2.getString("life_UV", "矫情"));
         tv_traffic.setText(prefs_2.getString("life_traffic", "拥堵费"));
+
+        Intent intent = new Intent(this, AutoUpdateService.class);
+        startService(intent);
     }
 
     @Override

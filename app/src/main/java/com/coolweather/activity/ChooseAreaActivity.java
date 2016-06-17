@@ -74,6 +74,7 @@ public class ChooseAreaActivity extends AppCompatActivity {
                     queryCities();
                 }else if (currentLevel == LEVEL_CITY){
                     selectedCity = list_city.get(position);
+                    MyApplication.currentCity = selectedCity;
                     Intent intent = new Intent(ChooseAreaActivity.this,
                             WeatherActivity.class);
                     intent.putExtra("city_code", selectedCity.getCityCode());
