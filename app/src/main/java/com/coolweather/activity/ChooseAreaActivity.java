@@ -51,11 +51,15 @@ public class ChooseAreaActivity extends AppCompatActivity {
     private Province selectedProvince; // 当前选中的省份
     private City selectedCity; // 当前选中的城市
     private int currentLevel; // 当前选中的级别
+
+    private boolean isFromWeatherActivity;// 是否从WeatherActivity跳过来
     @Override
     protected void onCreate(@Nullable Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.choose_area);
         getSupportActionBar().hide();
+
+        isFromWeatherActivity = getIntent().getBooleanExtra("from_weather_activity", false);
         titleText = (TextView) findViewById(R.id.title_text);
         listView = (ListView) findViewById(R.id.list_view);
         adapter = new ArrayAdapter<String>(this, android.R.layout.simple_list_item_1, dataList);
@@ -72,8 +76,12 @@ public class ChooseAreaActivity extends AppCompatActivity {
                     selectedCity = list_city.get(position);
                     Intent intent = new Intent(ChooseAreaActivity.this,
                             WeatherActivity.class);
-                    intent.putExtra("city_code", selectedCity.getCityName());
+                    intent.putExtra("city_code", selectedCity.getCityCode());
+                    intent.putExtra("city_name", selectedCity.getCityName());
                     startActivity(intent);
+                    if (isFromWeatherActivity){
+                        finish();
+                    }
                 }
             }
         });

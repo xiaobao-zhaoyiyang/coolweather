@@ -2,7 +2,6 @@ package com.coolweather.util;
 
 import android.content.Context;
 import android.content.SharedPreferences;
-import android.preference.PreferenceManager;
 import android.util.Log;
 
 import org.json.JSONArray;
@@ -30,7 +29,8 @@ public class Utility {
                 String weatherText = now.getString("text");
                 String weatherCode = now.getString("code");
                 String cityName = results.getJSONObject("location").getString("name");
-                saveWeatherInfo(context, cityName, temperature, weatherText, publishTime, weatherCode);
+                String cityCode = results.getJSONObject("location").getString("id");
+                saveWeatherInfo(context, cityCode, cityName, temperature, weatherText, publishTime, weatherCode);
             }
         } catch (JSONException e) {
             e.printStackTrace();
@@ -50,18 +50,22 @@ public class Utility {
                 String sport = suggestion.getJSONObject("sport").getString("brief");
                 String travel = suggestion.getJSONObject("travel").getString("brief");
                 String uv = suggestion.getJSONObject("uv").getString("brief");
-                saveWeatherLifeInfo(context, car_washing, dressing, flu, sport, travel, uv);
+                String cityName = results.getJSONObject("location").getString("name");
+                String cityCode = results.getJSONObject("location").getString("id");
+                saveWeatherLifeInfo(context, cityCode, car_washing, dressing, flu, sport, travel, uv);
             }
         } catch (JSONException e) {
             e.printStackTrace();
         }
     }
 
-    private static void saveWeatherInfo(Context context,
+    private static void saveWeatherInfo(Context context, String cityCode,
               String cityName, String temperature,
               String weatherText, String publishTime, String weatherCode) {
         SimpleDateFormat sdf = new SimpleDateFormat("yyyy年M月d日", Locale.CHINA);
-        SharedPreferences.Editor editor = PreferenceManager.getDefaultSharedPreferences(context).edit();
+        SharedPreferences sp = context.getSharedPreferences(cityCode + "_1", Context.MODE_PRIVATE);
+//        SharedPreferences.Editor editor = PreferenceManager.getDefaultSharedPreferences(context).edit();
+        SharedPreferences.Editor editor = sp.edit();
         editor.putBoolean("city_selected", true);
         editor.putString("city_name", cityName);
         editor.putString("temperature", temperature);
@@ -71,9 +75,11 @@ public class Utility {
         editor.putString("current_data", sdf.format(new Date()));
         editor.commit();
     }
-    private static void saveWeatherLifeInfo(Context context,String carWashing, String lifeDressing, String lifeFlu,
-                                            String lifeSport, String lifeTraffic, String lifeUV) {
-        SharedPreferences.Editor editor = PreferenceManager.getDefaultSharedPreferences(context).edit();
+    private static void saveWeatherLifeInfo(Context context, String cityCode, String carWashing, String lifeDressing,
+                                            String lifeFlu, String lifeSport, String lifeTraffic, String lifeUV) {
+        SharedPreferences sp = context.getSharedPreferences(cityCode + "_2", Context.MODE_PRIVATE);
+//        SharedPreferences.Editor editor = PreferenceManager.getDefaultSharedPreferences(context).edit();
+        SharedPreferences.Editor editor = sp.edit();
         editor.putString("car_washing", carWashing);
         editor.putString("life_dressing", lifeDressing);
         editor.putString("life_flu", lifeFlu);
