@@ -3,6 +3,7 @@ package com.coolweather.util;
 import android.content.Context;
 import android.content.SharedPreferences;
 import android.preference.PreferenceManager;
+import android.util.Log;
 
 import org.json.JSONArray;
 import org.json.JSONException;
@@ -23,11 +24,33 @@ public class Utility {
             for (int i = 0; i < array.length(); i++) {
                 JSONObject results = array.getJSONObject(i);
                 String publishTime = results.optString("last_update");
+                Log.i("Utility", "publish_time:" + publishTime);
                 JSONObject now = results.getJSONObject("now");
                 String temperature = now.getString("temperature");
                 String weatherText = now.getString("text");
+                String weatherCode = now.getString("code");
                 String cityName = results.getJSONObject("location").getString("name");
-                saveWeatherInfo(context, cityName, temperature, weatherText, publishTime);
+                saveWeatherInfo(context, cityName, temperature, weatherText, publishTime, weatherCode);
+            }
+        } catch (JSONException e) {
+            e.printStackTrace();
+        }
+    }
+
+    public static void handleWeatherLifeResponse(Context context, String response){
+        try {
+            JSONObject object = new JSONObject(response);
+            JSONArray array = object.getJSONArray("results");
+            for (int i = 0; i < array.length(); i++) {
+                JSONObject results = array.getJSONObject(i);
+                JSONObject suggestion = results.getJSONObject("suggestion");
+                String car_washing = suggestion.getJSONObject("car_washing").getString("brief");
+                String dressing = suggestion.getJSONObject("dressing").getString("brief");
+                String flu = suggestion.getJSONObject("flu").getString("brief");
+                String sport = suggestion.getJSONObject("sport").getString("brief");
+                String travel = suggestion.getJSONObject("travel").getString("brief");
+                String uv = suggestion.getJSONObject("uv").getString("brief");
+                saveWeatherLifeInfo(context, car_washing, dressing, flu, sport, travel, uv);
             }
         } catch (JSONException e) {
             e.printStackTrace();
@@ -36,7 +59,7 @@ public class Utility {
 
     private static void saveWeatherInfo(Context context,
               String cityName, String temperature,
-              String weatherText, String publishTime) {
+              String weatherText, String publishTime, String weatherCode) {
         SimpleDateFormat sdf = new SimpleDateFormat("yyyy年M月d日", Locale.CHINA);
         SharedPreferences.Editor editor = PreferenceManager.getDefaultSharedPreferences(context).edit();
         editor.putBoolean("city_selected", true);
@@ -44,7 +67,19 @@ public class Utility {
         editor.putString("temperature", temperature);
         editor.putString("weatherText", weatherText);
         editor.putString("publish_time", publishTime);
+        editor.putString("weather_code", weatherCode);
         editor.putString("current_data", sdf.format(new Date()));
+        editor.commit();
+    }
+    private static void saveWeatherLifeInfo(Context context,String carWashing, String lifeDressing, String lifeFlu,
+                                            String lifeSport, String lifeTraffic, String lifeUV) {
+        SharedPreferences.Editor editor = PreferenceManager.getDefaultSharedPreferences(context).edit();
+        editor.putString("car_washing", carWashing);
+        editor.putString("life_dressing", lifeDressing);
+        editor.putString("life_flu", lifeFlu);
+        editor.putString("life_sport", lifeSport);
+        editor.putString("life_traffic", lifeTraffic);
+        editor.putString("life_UV", lifeUV);
         editor.commit();
     }
 }
