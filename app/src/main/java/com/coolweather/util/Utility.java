@@ -4,6 +4,8 @@ import android.content.Context;
 import android.content.SharedPreferences;
 import android.util.Log;
 
+import com.coolweather.activity.MyApplication;
+
 import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
@@ -74,6 +76,7 @@ public class Utility {
         editor.putString("weather_code", weatherCode);
         editor.putString("current_data", sdf.format(new Date()));
         editor.commit();
+        MyApplication.handler.sendEmptyMessage(0);
     }
     private static void saveWeatherLifeInfo(Context context, String cityCode, String carWashing, String lifeDressing,
                                             String lifeFlu, String lifeSport, String lifeTraffic, String lifeUV) {

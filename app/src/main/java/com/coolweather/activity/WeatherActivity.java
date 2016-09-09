@@ -16,7 +16,6 @@ import android.widget.ImageView;
 import android.widget.TextView;
 
 import com.coolweather.R;
-import com.coolweather.service.AutoUpdateService;
 import com.coolweather.util.HttpCallbackListener;
 import com.coolweather.util.HttpUtil;
 import com.coolweather.util.Utility;
@@ -177,8 +176,8 @@ public class WeatherActivity extends AppCompatActivity implements View.OnClickLi
         tv_uv.setText(prefs_2.getString("life_UV", "矫情"));
         tv_traffic.setText(prefs_2.getString("life_traffic", "拥堵费"));
 
-        Intent intent = new Intent(this, AutoUpdateService.class);
-        startService(intent);
+//        Intent intent = new Intent(this, AutoUpdateService.class);
+//        startService(intent);
     }
 
     @Override
